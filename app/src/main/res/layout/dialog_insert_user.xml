@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true"
+    android:layout_height="wrap_content">
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Registro de Usuarios"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/nombre"
+            android:hint="nombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/apellido"
+            android:hint="apellido"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/materia"
+            android:hint="materia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:hint="email"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Seleccione las imagenes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/btnImageSelected"
+                android:text="Images"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_marginStart="20dp"
+                android:padding="10dp"
+                android:id="@+id/numeroImagenes"
+                android:hint="Numero de Imagenes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+        <Button
+            android:id="@+id/btnRegistrar"
+            android:text="Registrar"
+            android:textSize="20sp"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.cardview.widget.CardView>

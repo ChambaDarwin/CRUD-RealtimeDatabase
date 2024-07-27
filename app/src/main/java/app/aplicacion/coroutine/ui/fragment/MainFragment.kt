@@ -44,6 +44,7 @@ import com.google.firebase.storage.storage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -78,6 +79,7 @@ class MainFragment : Fragment() {
 
 
 
+
         return binding.root
     }
 
@@ -87,15 +89,7 @@ class MainFragment : Fragment() {
                 val posiiton = viewHolder.adapterPosition
                 val user = cadapter.diff.currentList[posiiton]
                 model.deleteUser(user)
-                user.listaImages!!.uid.forEach {imageUUid->
-                  val image= storage.reference.child("User/images/$imageUUid")
-                    image.delete().addOnSuccessListener {
-                        toast("registro eliminado con exito")
-                    }.addOnFailureListener {
-                        toast("error al eliminar ${it.message}")
-                        println("error ${it.message.toString()}")
-                    }
-                }
+                observeDelete()
 
             }
 
@@ -103,12 +97,29 @@ class MainFragment : Fragment() {
         ItemTouchHelper(delete).attachToRecyclerView(binding.recycler)
     }
 
+private fun observeDelete(){
+    model.observeDelete.observe(viewLifecycleOwner, Observer {
+        when(it){
+            is DataState.Error -> {
+                binding.progressBar.hideProgressBar()
+                toast(it.message.toString())
+            }
+            is DataState.Loading -> binding.progressBar.showProgressBar()
+            is DataState.Sucess -> {
+
+                binding.progressBar.hideProgressBar()
+                toast(it.data.toString())
+            }
+        }
+    })
+}
+
     private fun enviarDatos() {
         cadapter.sendId {
             val bundle = Bundle().apply {
                 putSerializable("user", it)
             }
-            findNavController().navigate(R.id.action_mainFragment_to_editFragment, bundle)
+            findNavController().navigate(R.id.action_mainFragment_to_ediFragment, bundle)
         }
 
     }

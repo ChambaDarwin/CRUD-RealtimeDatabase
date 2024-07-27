@@ -26,9 +26,13 @@ object ModuleDatabase {
     @Singleton
     fun providesReference(data: FirebaseDatabase) = data.getReference("User")
 
+    @Provides
+    @Singleton
+    fun providesInstanceStore() = Firebase.storage.reference
 
     @Provides
     @Singleton
-    fun providesRepository(reference:DatabaseReference):UserRepository =UserImplementation(reference)
+    fun providesRepository(reference: DatabaseReference, store: StorageReference): UserRepository =
+        UserImplementation(reference, store)
 
 }

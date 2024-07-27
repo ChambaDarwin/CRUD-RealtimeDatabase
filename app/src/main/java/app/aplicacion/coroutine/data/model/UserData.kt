@@ -8,7 +8,7 @@ data class UserData (
     val apellido:String,
     val email:String,
     val materia:String,
-    var listaImages:ImageStorage?
+   var image:ImageStorage?
         ):Serializable{
     constructor() :this("","","","","", null)
     fun toMap():Map<String,Any>{
@@ -17,7 +17,10 @@ data class UserData (
             "nombre" to nombre,
             "apellido" to apellido,
             "email" to email,
-            "materia" to materia
+            "materia" to materia,
+            "image" to image!!.convertToMap()
+
+
 
         )
     }

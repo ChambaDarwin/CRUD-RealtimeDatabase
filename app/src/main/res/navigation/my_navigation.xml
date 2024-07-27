@@ -11,27 +11,24 @@
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
-            android:id="@+id/action_mainFragment_to_editFragment"
-            app:destination="@id/editFragment" />
-        <action
             android:id="@+id/action_mainFragment_to_imageFragment"
-            app:destination="@id/imageFragment" />
+            app:destination="@id/addFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_ediFragment"
+            app:destination="@id/ediFragment" />
     </fragment>
     <fragment
-        android:id="@+id/editFragment"
-        android:name="app.aplicacion.coroutine.ui.fragment.EditFragment"
-        android:label="fragment_edit"
-        tools:layout="@layout/fragment_edit" >
+        android:id="@+id/addFragment"
+        android:name="app.aplicacion.coroutine.ui.fragment.AddFragment"
+        android:label="fragment_add"
+        tools:layout="@layout/fragment_add" />
+    <fragment
+        android:id="@+id/ediFragment"
+        android:name="app.aplicacion.coroutine.ui.fragment.EdiFragment"
+        android:label="fragment_edi"
+        tools:layout="@layout/fragment_edi" >
         <argument
             android:name="user"
             app:argType="app.aplicacion.coroutine.data.model.UserData" />
-        <action
-            android:id="@+id/action_editFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/imageFragment"
-        android:name="app.aplicacion.coroutine.ui.fragment.AddFragment"
-        android:label="fragment_image"
-        tools:layout="@layout/fragment_image" />
 </navigation>

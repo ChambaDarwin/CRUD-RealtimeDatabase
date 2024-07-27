@@ -1,5 +1,6 @@
 package app.aplicacion.coroutine.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,8 +9,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import app.aplicacion.coroutine.R
 import app.aplicacion.coroutine.data.model.UserData
-
 import app.aplicacion.coroutine.databinding.ItemRecyclerBinding
+import com.bumptech.glide.Glide
 
 class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
@@ -23,32 +24,37 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
         }
 
 
-
-
     }
     val diff = AsyncListDiffer(this, userItem)
 
     inner class UserViewHolder(private val view: View) :
         RecyclerView.ViewHolder(view) {
         val binding = ItemRecyclerBinding.bind(view)
+
+
         fun render(user: UserData, ids: ((UserData) -> Unit)?) {
 
             binding.nombre.text = user.nombre
             binding.apellido.text = user.apellido
             binding.email.text = user.email
             binding.materia.text = user.materia
+
+            Glide.with(binding.imageView).load(user.image!!.donwload[0]).into(binding.imageView)
+
+
             itemView.setOnClickListener {
                 ids?.invoke(user)
 
             }
+
+
         }
     }
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_recycler, parent, false)
-        return UserViewHolder(view)
+
+        return UserViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_recycler,parent,false))
     }
 
     private var user: ((UserData) -> Unit)? = null

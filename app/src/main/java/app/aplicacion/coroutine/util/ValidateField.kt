@@ -5,6 +5,8 @@ sealed class ValidateField{
     object Succes:ValidateField()
 }
 data class ValidateUser(
-    val email:ValidateField,
-    val nombre:ValidateField
+    val nombre:ValidateField,
+    val apellido:ValidateField,
+    val materia:ValidateField,
+    val email:ValidateField
 )

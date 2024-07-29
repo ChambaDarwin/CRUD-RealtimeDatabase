@@ -16,6 +16,7 @@ import com.google.firebase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -54,7 +55,6 @@ class UserImplementation @Inject constructor(
         try {
             val listaUid = mutableListOf<String>()
             val listaString = mutableListOf<String>()
-
             coroutineScope {
                 async {
                     byteArray.forEach {
@@ -82,26 +82,24 @@ class UserImplementation @Inject constructor(
         try {
             coroutineScope {
                 async {
-                    reference.child(user.id).removeValue().addOnSuccessListener {
-                        user.image!!.uid.forEach { imageUUid ->
-                            launch {
-                                store.child("User/image/$imageUUid").delete().await()
-                            }
+                    user.image?.let {imageDelete->
+                        imageDelete.uid.forEach {
+                            store.child("User/image/$it").delete().await()
                         }
 
-                    }.addOnFailureListener {
-                        state.invoke(DataState.Error(it.message))
                     }
                 }.await()
-                state.invoke(DataState.Sucess("registro eliminado con exito"))
+                reference.child(user.id).removeValue().await()
+                state.invoke(DataState.Sucess("Registro eliminado con exito"))
             }
 
-        } catch (e: Exception) {
-            // Log a more descriptive error message or re-throw with context
+
+        }catch (e:Exception){
             e.printStackTrace()
-            state.invoke(DataState.Error(e.message))
+            state.invoke(DataState.Error("Error: ${e.message}"))
         }
     }
+
 
 
     override suspend fun updateUser(user: UserData, state: (DataState<String>) -> Unit) {
@@ -110,7 +108,7 @@ class UserImplementation @Inject constructor(
                 async {
                     reference.child(user.id).updateChildren(user.toMap()).await()
                 }.await()
-                state.invoke(DataState.Sucess("registro realizado con exito"))
+                state.invoke(DataState.Sucess("registro modificado con exito"))
             }
         } catch (e: Exception) {
             e.printStackTrace()

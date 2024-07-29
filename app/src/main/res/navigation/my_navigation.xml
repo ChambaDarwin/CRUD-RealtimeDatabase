@@ -11,17 +11,21 @@
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
-            android:id="@+id/action_mainFragment_to_imageFragment"
-            app:destination="@id/addFragment" />
-        <action
             android:id="@+id/action_mainFragment_to_ediFragment"
             app:destination="@id/ediFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_addFragment"
+            app:destination="@id/addFragment" />
     </fragment>
     <fragment
         android:id="@+id/addFragment"
         android:name="app.aplicacion.coroutine.ui.fragment.AddFragment"
         android:label="fragment_add"
-        tools:layout="@layout/fragment_add" />
+        tools:layout="@layout/fragment_add" >
+        <action
+            android:id="@+id/action_addFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
     <fragment
         android:id="@+id/ediFragment"
         android:name="app.aplicacion.coroutine.ui.fragment.EdiFragment"
@@ -30,5 +34,8 @@
         <argument
             android:name="user"
             app:argType="app.aplicacion.coroutine.data.model.UserData" />
+        <action
+            android:id="@+id/action_ediFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
     </fragment>
 </navigation>

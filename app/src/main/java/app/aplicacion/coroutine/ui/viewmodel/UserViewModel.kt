@@ -26,7 +26,9 @@ import app.aplicacion.coroutine.databinding.FragmentAddBinding
 import app.aplicacion.coroutine.util.DataState
 import app.aplicacion.coroutine.util.ValidateField
 import app.aplicacion.coroutine.util.ValidateUser
+import app.aplicacion.coroutine.util.validateApellido
 import app.aplicacion.coroutine.util.validateEmail
+import app.aplicacion.coroutine.util.validateMateria
 import app.aplicacion.coroutine.util.validateName
 import com.bumptech.glide.Glide.init
 import com.google.firebase.auth.FirebaseUser
@@ -46,6 +48,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 import javax.inject.Inject
+
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val repository: UserImplementation
@@ -63,8 +66,11 @@ class UserViewModel @Inject constructor(
     private val _updateData = MutableLiveData<DataState<String>>()
     val updateData: LiveData<DataState<String>> get() = _updateData
 
-    private val _obserDelete=MutableLiveData<DataState<String>>()
-    val observeDelete:LiveData<DataState<String>> get() =_obserDelete
+    private val _obserDelete = MutableLiveData<DataState<String>>()
+    val observeDelete: LiveData<DataState<String>> get() = _obserDelete
+
+    private val _validatUser = Channel<ValidateUser>()
+    val validateUser = _validatUser.receiveAsFlow()
 
 
     init {
@@ -78,13 +84,17 @@ class UserViewModel @Inject constructor(
     }
 
     fun insertUser(user: UserData) {
-        viewModelScope.launch {
-            _insertData.value = DataState.Loading()
-            repository.insertUser(user) { _insertData.value = it }
-        }
+
+            viewModelScope.launch {
+                _insertData.value = DataState.Loading()
+                repository.insertUser(user) { _insertData.value = it }
+            }
+
+
     }
 
     fun insertImage(byteArray: List<ByteArray>) {
+
         viewModelScope.launch {
             _storeCloud.value = DataState.Loading()
             repository.insertCloudStorage(byteArray) { _storeCloud.value = it }
@@ -92,46 +102,48 @@ class UserViewModel @Inject constructor(
     }
 
     fun updateUser(user: UserData) {
-        viewModelScope.launch {
-            _updateData.value=DataState.Loading()
-            repository.updateUser(user) {
-                _updateData.value = it
+        if (validateUserInput(user)) {
+
+            viewModelScope.launch {
+                _updateData.value = DataState.Loading()
+                repository.updateUser(user) {
+                    _updateData.value = it
+                }
+            }
+        } else {
+            val validateUserField = ValidateUser(
+                validateName(user.email),
+                validateApellido(user.nombre),
+                validateMateria(user.email),
+                validateEmail(user.nombre)
+
+            )
+            runBlocking {
+                _validatUser.send(validateUserField)
             }
         }
-    }
 
+
+    }
     fun deleteUser(user: UserData) {
-        _obserDelete.value=DataState.Loading()
+        _obserDelete.value = DataState.Loading()
         viewModelScope.launch {
-            repository.deleteUser(user){_obserDelete.value=it}
+            repository.deleteUser(user) { _obserDelete.value = it }
         }
 
     }
-}
 
-/*
 
     private fun validateUserInput(user: UserData): Boolean {
         val nameValidate = validateName(user.nombre)
         val emailValidate = validateEmail(user.email)
+        val apellidoValidate = validateApellido(user.apellido)
+        val materiaValidate = validateMateria(user.materia)
         return nameValidate is ValidateField.Succes && emailValidate is ValidateField.Succes
+                && apellidoValidate is ValidateField.Succes && materiaValidate is ValidateField.Succes
     }
-    /*
-    private val _validatUser = Channel<ValidateUser>()
-    val validateUser = _validatUser.receiveAsFlow()
 
-
-          }else {
-              val validateUserField = ValidateUser(
-                  validateName(user.email),
-                  validateEmail(user.nombre)
-              )
-              runBlocking {
-                  _validatUser.send(validateUserField)
-              }
-          }
-
-           */
+}
 
 
 
@@ -140,4 +152,8 @@ class UserViewModel @Inject constructor(
 
 
 
- */
+
+
+
+
+

@@ -45,6 +45,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -69,7 +70,7 @@ class MainFragment : Fragment() {
         model = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
 
         binding.btnAddUser.setOnClickListener {
-           findNavController().navigate(R.id.action_mainFragment_to_imageFragment)
+           findNavController().navigate(R.id.action_mainFragment_to_addFragment)
         }
         storage = Firebase.storage
         initRecycler()

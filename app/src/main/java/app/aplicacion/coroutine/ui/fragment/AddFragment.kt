@@ -49,14 +49,13 @@ import java.util.UUID
 class AddFragment : Fragment() {
     private lateinit var binding: FragmentAddBinding
     private lateinit var storage: FirebaseStorage
-    private lateinit var refereneStorage: StorageReference
+    private lateinit var referenceStorage: StorageReference
     private val listaUri = mutableListOf<Uri>()
     private lateinit var model: UserViewModel
     private lateinit var imageStorage: ImageStorage
-    val lisImages = mutableListOf<String>()
-    val lisUid = mutableListOf<String>()
-    val lista = mutableListOf<ByteArray>()
-
+    private val lisImages = mutableListOf<String>()
+    private val lisUid = mutableListOf<String>()
+    private val lista = mutableListOf<ByteArray>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,32 +72,60 @@ class AddFragment : Fragment() {
         binding.btnRegistrar.setOnClickListener {
             saveImages()
         }
-        observeInserStorage()
-
+        observeInsertStorage()
+        observeValidationErrors()
 
         return binding.root
     }
 
-    private fun saveImages() {
-
-        if (!getByteArray().isEmpty()) {
-            model.insertImage(getByteArray())
-            listaUri.clear()
-
-        } else {
-            toast("la lista byteArray esta vacia")
+    private fun observeValidationErrors() {
+        lifecycleScope.launchWhenStarted {
+            model.validateUser.collect {
+                if (it.nombre is ValidateField.Error) {
+                    binding.nombre.apply {
+                        requestFocus()
+                        setError(it.nombre.message)
+                    }
+                }
+                if (it.apellido is ValidateField.Error) {
+                    binding.apellido.apply {
+                        requestFocus()
+                        setError(it.apellido.message)
+                    }
+                }
+                if (it.materia is ValidateField.Error) {
+                    binding.materia.apply {
+                        requestFocus()
+                        setError(it.materia.message)
+                    }
+                }
+                if (it.email is ValidateField.Error) {
+                    binding.email.apply {
+                        requestFocus()
+                        setError(it.email.message)
+                    }
+                }
+            }
         }
     }
 
-    private fun observeInserStorage() {
+    private fun saveImages() {
+        val byteArrayList = getByteArray()
+        if (byteArrayList.isNotEmpty()) {
+            model.insertImage(byteArrayList)
+            listaUri.clear()
+        } else {
+            toast("La lista byteArray está vacía")
+        }
+    }
+
+    private fun observeInsertStorage() {
         model.storeCloud.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is DataState.Error -> {
-
                     binding.progressBar.hideProgressBar()
                     toast(it.message.toString())
                 }
-
                 is DataState.Loading -> binding.progressBar.showProgressBar()
                 is DataState.Sucess -> {
                     binding.progressBar.hideProgressBar()
@@ -106,72 +133,59 @@ class AddFragment : Fragment() {
                     val apellido = binding.apellido.text.toString()
                     val materia = binding.materia.text.toString()
                     val email = binding.email.text.toString()
-                    if(!nombre.isEmpty() && !apellido.isEmpty() && !materia.isEmpty() && !email.isEmpty()){
-                        val user=UserData("",nombre,apellido,email,materia,it.data!!)
+                    if (nombre.isNotEmpty() && apellido.isNotEmpty() && materia.isNotEmpty() && email.isNotEmpty()) {
+                        val user = UserData("", nombre, apellido, email, materia, it.data!!)
                         model.insertUser(user)
-                        toast("registro realizado con exito")
-                        findNavController().popBackStack()
+                        toast("Registro realizado con éxito")
+                        findNavController().popBackStack(R.id.mainFragment, false)
                     }
-
-
                 }
             }
         })
     }
 
-
     private fun selectImages() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        intent.type = "image/*"
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            type = "image/*"
+        }
         register.launch(intent)
     }
 
-    val register = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val register = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             val intent = it.data
             if (intent?.clipData != null) {
                 val count = intent.clipData?.itemCount ?: 0
-                (0 until count).forEach {
-                    val imageUri = intent.clipData?.getItemAt(it)?.uri
-                    imageUri?.let {
-                        listaUri.add(it)
+                for (i in 0 until count) {
+                    intent.clipData?.getItemAt(i)?.uri?.let { uri ->
+                        listaUri.add(uri)
                     }
                 }
-
             } else {
-                val uri = intent?.data
-                uri?.let {
+                intent?.data?.let { uri ->
                     listaUri.add(uri)
                 }
-
             }
             setSizeOfList()
         }
     }
 
     private fun setSizeOfList() {
-        binding.numeroImagenes.setText("${listaUri.size}")
+        binding.numeroImagenes.text = "${listaUri.size}"
     }
 
-    fun getByteArray(): List<ByteArray> {
+    private fun getByteArray(): List<ByteArray> {
         lista.clear()
-
-        if (!listaUri.isNullOrEmpty()) {
-
-            listaUri.forEach {
+        if (listaUri.isNotEmpty()) {
+            listaUri.forEach { uri ->
                 val stream = ByteArrayOutputStream()
-                val bitMap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, it)
-
-                if (bitMap.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
+                val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+                if (bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
                     lista.add(stream.toByteArray())
                 }
             }
-
         }
-
         return lista
-
     }
-
 }

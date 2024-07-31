@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -20,7 +19,7 @@ import app.aplicacion.coroutine.databinding.FragmentEdiBinding
 import app.aplicacion.coroutine.ui.adapter.adapterviewpager.AdapterViewPager
 import app.aplicacion.coroutine.ui.viewmodel.UserViewModel
 import app.aplicacion.coroutine.util.DataState
-import app.aplicacion.coroutine.util.ValidateField
+import kotlinx.coroutines.flow.collect
 
 
 class EdiFragment : Fragment() {
@@ -42,12 +41,62 @@ class EdiFragment : Fragment() {
             modificarUsuario()
         }
 
-
         binding.viewPager2.adapter = pager
-        observeEmpty()
+
 
         return binding.root
     }
+
+
+
+    private fun modificarUsuario() {
+        val nombre = binding.nombre.text.toString()
+        val apellido = binding.apellido.text.toString()
+        val materia = binding.materia.text.toString()
+        val email = binding.email.text.toString()
+
+        val user = UserData(args.user.id, nombre, apellido, email, materia, args.user.image)
+        model.updateUserReal(user)
+        toast("registro modificado con exito")
+        findNavController().popBackStack()
+
+    }
+
+    private fun observeUpdate() {
+        lifecycleScope.launchWhenStarted {
+            model.userDataState.collect{ dataState ->
+                when (dataState) {
+                    is DataState.Loading -> {
+                        binding.progress.showProgressBar()
+                    }
+                    is DataState.Sucess -> {
+                        binding.progress.hideProgressBar()
+                        toast(dataState.data.toString())
+
+                        findNavController().navigate(R.id.action_ediFragment_to_mainFragment)
+                        findNavController().popBackStack()
+                    }
+                    is DataState.Error -> {
+                        binding.progress.hideProgressBar()
+                        toast(dataState.message.toString())
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+
+
+    }
+
+    private fun introducirDatos() {
+        pager.setListaImages(args.user.image!!.donwload.toMutableList())
+        binding.nombre.setText(args.user.nombre)
+        binding.apellido.setText(args.user.apellido)
+        binding.email.setText(args.user.email)
+        binding.materia.setText(args.user.materia)
+    }
+    /*
     private fun observeEmpty() {
         lifecycleScope.launchWhenStarted {
             model.validateUser.collect {
@@ -77,57 +126,14 @@ class EdiFragment : Fragment() {
                 }
             }
         }
-
     }
 
-    private fun modificarUsuario() {
-        val nombre = binding.nombre.text.toString()
-        val apellido = binding.apellido.text.toString()
-        val materia = binding.materia.text.toString()
-        val email = binding.email.text.toString()
-
-            val user = UserData(args.user.id, nombre, apellido, email, materia,args.user.image)
-            model.updateUser(user)
-            observeUpdate()
-
-    }
-
-    private fun observeUpdate() {
-        model.updateData.observe(viewLifecycleOwner, Observer {
-            when (it) {
-                is DataState.Error -> {
-                    binding.progress.hideProgressBar()
-                    toast(it.message.toString())
-                }
-                is DataState.Loading -> {
-                    binding.progress.showProgressBar()
-                }
-                is DataState.Sucess -> {
-                    binding.progress.hideProgressBar()
-                    toast("Registro modificado")
-                    findNavController().popBackStack()
-                    findNavController().navigate(R.id.action_ediFragment_to_mainFragment)
-
-                }
-                else -> {}
-            }
-        })
-    }
-
-    private fun introducirDatos() {
-        pager.setListaImages(args.user.image!!.donwload.toMutableList())
-        binding.nombre.setText(args.user.nombre)
-        binding.apellido.setText(args.user.apellido)
-        binding.email.setText(args.user.email)
-        binding.materia.setText(args.user.materia)
-    }
-
+     */
     private fun vaciarCampos() {
         binding.nombre.setText("")
         binding.apellido.setText("")
         binding.email.setText("")
         binding.materia.setText("")
     }
-
-
 }
+

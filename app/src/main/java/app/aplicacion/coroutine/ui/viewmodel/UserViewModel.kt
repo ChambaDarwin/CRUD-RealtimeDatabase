@@ -23,6 +23,8 @@ import app.aplicacion.coroutine.data.model.UserData
 import app.aplicacion.coroutine.data.repository.UserImplementation
 import app.aplicacion.coroutine.data.repository.UserRepository
 import app.aplicacion.coroutine.databinding.FragmentAddBinding
+import app.aplicacion.coroutine.domain.DeleteUseCase
+import app.aplicacion.coroutine.domain.UpdateUseCase
 import app.aplicacion.coroutine.util.DataState
 import app.aplicacion.coroutine.util.ValidateField
 import app.aplicacion.coroutine.util.ValidateUser
@@ -51,20 +53,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val repository: UserImplementation
+    private val repository: UserImplementation,
+    private val updateUseCase: UpdateUseCase,
+    private val deleteUseCase: DeleteUseCase
 ) : ViewModel() {
 
-    private val _lista = MutableLiveData<List<UserData>>()
-    val lista: LiveData<List<UserData>> = _lista
+    private val _lista = MutableLiveData<DataState<MutableList<UserData>>>()
+    val lista: LiveData<DataState<MutableList<UserData>>> = _lista
 
     private val _insertData = MutableLiveData<DataState<String>>()
     val insertData: LiveData<DataState<String>> get() = _insertData
 
     private val _storeCloud = MutableLiveData<DataState<ImageStorage>>()
     val storeCloud: LiveData<DataState<ImageStorage>> = _storeCloud
-
-    private val _updateData = MutableLiveData<DataState<String>>()
-    val updateData: LiveData<DataState<String>> get() = _updateData
+    //observarCambios cuando se elimine
 
     private val _obserDelete = MutableLiveData<DataState<String>>()
     val observeDelete: LiveData<DataState<String>> get() = _obserDelete
@@ -72,65 +74,21 @@ class UserViewModel @Inject constructor(
     private val _validatUser = Channel<ValidateUser>()
     val validateUser = _validatUser.receiveAsFlow()
 
+    val operationState = MutableStateFlow<DataState<String>?>(null)
+
+    private val
+            _userDataState: MutableStateFlow<DataState<String>?> = MutableStateFlow(null)
+    val userDataState: StateFlow<DataState<String>?> = _userDataState
 
     init {
         getAllUser()
     }
 
-    fun getAllUser() {
-        repository.getAllUser {
-            _lista.value = it
-        }
-    }
-
-    fun insertUser(user: UserData) {
-
-            viewModelScope.launch {
-                _insertData.value = DataState.Loading()
-                repository.insertUser(user) { _insertData.value = it }
-            }
-
-
-    }
-
-    fun insertImage(byteArray: List<ByteArray>) {
-
+    fun updateUserReal(user: UserData) {
         viewModelScope.launch {
-            _storeCloud.value = DataState.Loading()
-            repository.insertCloudStorage(byteArray) { _storeCloud.value = it }
+            val observe = updateUseCase.updateUser(user)
+            _userDataState.value = observe
         }
-    }
-
-    fun updateUser(user: UserData) {
-        if (validateUserInput(user)) {
-
-            viewModelScope.launch {
-                _updateData.value = DataState.Loading()
-                repository.updateUser(user) {
-                    _updateData.value = it
-                }
-            }
-        } else {
-            val validateUserField = ValidateUser(
-                validateName(user.email),
-                validateApellido(user.nombre),
-                validateMateria(user.email),
-                validateEmail(user.nombre)
-
-            )
-            runBlocking {
-                _validatUser.send(validateUserField)
-            }
-        }
-
-
-    }
-    fun deleteUser(user: UserData) {
-        _obserDelete.value = DataState.Loading()
-        viewModelScope.launch {
-            repository.deleteUser(user) { _obserDelete.value = it }
-        }
-
     }
 
 
@@ -143,8 +101,44 @@ class UserViewModel @Inject constructor(
                 && apellidoValidate is ValidateField.Succes && materiaValidate is ValidateField.Succes
     }
 
-}
 
+    fun getAllUser() {
+        repository.getAllUser {
+            _lista.value = it
+        }
+    }
+
+    fun insertUser(user: UserData) {
+
+        viewModelScope.launch {
+            _insertData.value = DataState.Loading()
+            repository.insertUser(user) { _insertData.value = it }
+        }
+
+
+    }
+
+    fun insertImage(byteArray: List<ByteArray>) {
+
+        viewModelScope.launch {
+            _storeCloud.value = DataState.Loading()
+            repository.insertCloudStorage(byteArray) { _storeCloud.value = it }
+        }
+    }
+
+
+    fun deleteUser(user: UserData) {
+        _obserDelete.value = DataState.Loading()
+        viewModelScope.launch {
+
+            val result = deleteUseCase.deleteUser(user)
+            _obserDelete.value = result
+        }
+
+    }
+
+
+}
 
 
 

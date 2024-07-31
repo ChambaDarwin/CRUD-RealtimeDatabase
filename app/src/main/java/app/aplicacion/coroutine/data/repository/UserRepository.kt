@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import app.aplicacion.coroutine.data.model.ImageStorage
 import app.aplicacion.coroutine.data.model.UserData
 import app.aplicacion.coroutine.util.DataState
+import kotlinx.coroutines.flow.Flow
 
 
 interface UserRepository {
@@ -13,7 +14,7 @@ interface UserRepository {
         state: (DataState<ImageStorage>) -> Unit
     )
 
-    suspend fun deleteUser(user: UserData, state: (DataState<String>) -> Unit)
-    suspend fun updateUser(user: UserData, state: (DataState<String>) -> Unit)
-    fun getAllUser(lista: (MutableList<UserData>) -> Unit)
+    suspend fun deleteUser(user: UserData): DataState<String>
+    suspend fun updateUser(user: UserData):DataState<String>
+    fun getAllUser(lista: (DataState<MutableList<UserData>>) -> Unit)
 }

@@ -105,7 +105,10 @@ private fun observeDelete(){
                 binding.progressBar.hideProgressBar()
                 toast(it.message.toString())
             }
-            is DataState.Loading -> binding.progressBar.showProgressBar()
+            is DataState.Loading -> {
+
+                binding.progressBar.showProgressBar()
+            }
             is DataState.Sucess -> {
 
                 binding.progressBar.hideProgressBar()
@@ -126,9 +129,6 @@ private fun observeDelete(){
     }
 
 
-
-
-
     private fun initRecycler() {
         cadapter = UserAdapter()
         binding.recycler.apply {
@@ -140,7 +140,20 @@ private fun observeDelete(){
 
     private fun showData() {
         model.lista.observe(viewLifecycleOwner, Observer {
-            cadapter.diff.submitList(it)
+           when(it){
+               is DataState.Error -> {
+                   binding.progressBar.hideProgressBar()
+                   toast(it.message.toString())
+               }
+               is DataState.Loading -> {
+                   binding.progressBar.showProgressBar()
+               }
+               is DataState.Sucess -> {
+
+                   binding.progressBar.hideProgressBar()
+                   cadapter.diff.submitList(it.data)
+               }
+           }
 
         })
 

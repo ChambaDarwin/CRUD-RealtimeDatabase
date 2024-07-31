@@ -54,6 +54,11 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'junit:junit:4.+' // Dependencia para JUnit
+
+    testImplementation "io.mockk:mockk:1.13.5"
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     //<-----------------------------REALTIME DATABASE----------------------------->
@@ -86,6 +91,11 @@ dependencies {
 
     //----------------------------dagger hilt-----------------------------------------------------------
     implementation 'com.google.dagger:hilt-android:2.48.1'
+    androidTestImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+
     kapt 'com.google.dagger:hilt-compiler:2.48.1'
 
     //----------------------------glide----------------------------------------------------------
@@ -94,7 +104,6 @@ dependencies {
     // Add the dependency for the Cloud Storage library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-storage")
-
 
 }
 kapt {

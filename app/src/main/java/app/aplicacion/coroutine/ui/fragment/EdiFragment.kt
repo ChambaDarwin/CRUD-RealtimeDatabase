@@ -42,7 +42,7 @@ class EdiFragment : Fragment() {
         binding.btnRegistrar.setOnClickListener {
             modificarUsuario()
         }
-        //observeEmpty()
+        observeEmpty()
         observeUpdate()
         binding.viewPager2.adapter = pager
 
@@ -58,14 +58,8 @@ class EdiFragment : Fragment() {
         val email = binding.email.text.toString()
 
         val user = UserData(args.user.id, nombre, apellido, email, materia, args.user.image)
-        if(nombre.isNotEmpty() && apellido.isNotEmpty() && materia.isNotEmpty() && email.isNotEmpty()){
-            model.updateUserReal(user)
-            toast("registro modificado con exito")
-            vaciarCampos()
-        }else{
-            toast("debes llenar los campos primero")
-        }
 
+        model.updateUserReal(user)
 
     }
 
@@ -80,7 +74,9 @@ class EdiFragment : Fragment() {
                     is DataState.Sucess -> {
                         binding.progress.hideProgressBar()
                         findNavController().popBackStack()
-                        model._userDataState.value=null
+                        toast("registro modificado con exito")
+                        model._userDataState.value = null
+
                     }
 
                     is DataState.Error -> {

@@ -67,7 +67,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
-        model = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
+        model = ViewModelProvider(this).get(UserViewModel::class.java)
 
         binding.btnAddUser.setOnClickListener {
            findNavController().navigate(R.id.action_mainFragment_to_addFragment)
@@ -77,6 +77,7 @@ class MainFragment : Fragment() {
         showData()
         enviarDatos()
         deleteUser()
+        observeDelete()
 
 
 
@@ -90,7 +91,8 @@ class MainFragment : Fragment() {
                 val posiiton = viewHolder.adapterPosition
                 val user = cadapter.diff.currentList[posiiton]
                 model.deleteUser(user)
-                observeDelete()
+                toast("registro eliminado con exito")
+
 
             }
 
@@ -112,7 +114,7 @@ private fun observeDelete(){
             is DataState.Sucess -> {
 
                 binding.progressBar.hideProgressBar()
-                toast(it.data.toString())
+               // toast(it.data.toString())
             }
         }
     })

@@ -75,7 +75,7 @@ class UserViewModel @Inject constructor(
     private val _validatUser = Channel<ValidateUser>()
     val validateUser = _validatUser.receiveAsFlow()
 
-     var
+    var
             _userDataState: MutableStateFlow<DataState<String>?> = MutableStateFlow(null)
     val userDataState: StateFlow<DataState<String>?> = _userDataState.asStateFlow()
 
@@ -84,7 +84,7 @@ class UserViewModel @Inject constructor(
     }
 
     fun updateUserReal(user: UserData) {
-       if (validateUserInput(user)) {
+        if (validateUserInput(user)) {
             viewModelScope.launch {
                 _userDataState.value = DataState.Loading() // Mostrar estado de carga
                 val observe = updateUseCase.updateUser(user)
@@ -99,17 +99,15 @@ class UserViewModel @Inject constructor(
                 validateEmail(user.email)
             )
 
-               runBlocking {
-                   _validatUser.send(data)
-               }
+            runBlocking {
+                _validatUser.send(data)
+            }
 
 
         }
 
 
     }
-
-
 
 
     private fun validateUserInput(user: UserData): Boolean {
@@ -124,7 +122,7 @@ class UserViewModel @Inject constructor(
 
     fun getAllUser() {
         repository.getAllUser {
-            _lista.value=DataState.Loading()
+            _lista.value = DataState.Loading()
             _lista.value = it
         }
     }

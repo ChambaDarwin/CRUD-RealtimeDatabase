@@ -19,7 +19,9 @@ import app.aplicacion.coroutine.databinding.FragmentEdiBinding
 import app.aplicacion.coroutine.ui.adapter.adapterviewpager.AdapterViewPager
 import app.aplicacion.coroutine.ui.viewmodel.UserViewModel
 import app.aplicacion.coroutine.util.DataState
+import app.aplicacion.coroutine.util.ValidateField
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 class EdiFragment : Fragment() {
@@ -40,13 +42,13 @@ class EdiFragment : Fragment() {
         binding.btnRegistrar.setOnClickListener {
             modificarUsuario()
         }
-
+        //observeEmpty()
+        observeUpdate()
         binding.viewPager2.adapter = pager
 
 
         return binding.root
     }
-
 
 
     private fun modificarUsuario() {
@@ -56,26 +58,31 @@ class EdiFragment : Fragment() {
         val email = binding.email.text.toString()
 
         val user = UserData(args.user.id, nombre, apellido, email, materia, args.user.image)
-        model.updateUserReal(user)
-        toast("registro modificado con exito")
-        findNavController().popBackStack()
+        if(nombre.isNotEmpty() && apellido.isNotEmpty() && materia.isNotEmpty() && email.isNotEmpty()){
+            model.updateUserReal(user)
+            toast("registro modificado con exito")
+            vaciarCampos()
+        }else{
+            toast("debes llenar los campos primero")
+        }
+
 
     }
 
     private fun observeUpdate() {
         lifecycleScope.launchWhenStarted {
-            model.userDataState.collect{ dataState ->
+            model.userDataState.collect { dataState ->
                 when (dataState) {
                     is DataState.Loading -> {
                         binding.progress.showProgressBar()
                     }
+
                     is DataState.Sucess -> {
                         binding.progress.hideProgressBar()
-                        toast(dataState.data.toString())
-
-                        findNavController().navigate(R.id.action_ediFragment_to_mainFragment)
                         findNavController().popBackStack()
+                        model._userDataState.value=null
                     }
+
                     is DataState.Error -> {
                         binding.progress.hideProgressBar()
                         toast(dataState.message.toString())
@@ -96,7 +103,7 @@ class EdiFragment : Fragment() {
         binding.email.setText(args.user.email)
         binding.materia.setText(args.user.materia)
     }
-    /*
+
     private fun observeEmpty() {
         lifecycleScope.launchWhenStarted {
             model.validateUser.collect {
@@ -124,11 +131,12 @@ class EdiFragment : Fragment() {
                         setError(it.email.message)
                     }
                 }
+
             }
         }
     }
 
-     */
+
     private fun vaciarCampos() {
         binding.nombre.setText("")
         binding.apellido.setText("")

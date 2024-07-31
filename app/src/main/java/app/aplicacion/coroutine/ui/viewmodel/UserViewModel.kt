@@ -42,6 +42,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -74,22 +75,41 @@ class UserViewModel @Inject constructor(
     private val _validatUser = Channel<ValidateUser>()
     val validateUser = _validatUser.receiveAsFlow()
 
-    val operationState = MutableStateFlow<DataState<String>?>(null)
-
-    private val
+     var
             _userDataState: MutableStateFlow<DataState<String>?> = MutableStateFlow(null)
-    val userDataState: StateFlow<DataState<String>?> = _userDataState
+    val userDataState: StateFlow<DataState<String>?> = _userDataState.asStateFlow()
 
     init {
         getAllUser()
     }
 
     fun updateUserReal(user: UserData) {
-        viewModelScope.launch {
-            val observe = updateUseCase.updateUser(user)
-            _userDataState.value = observe
+       if (validateUserInput(user)) {
+            viewModelScope.launch {
+                _userDataState.value = DataState.Loading() // Mostrar estado de carga
+                val observe = updateUseCase.updateUser(user)
+                _userDataState.value = observe // Actualizar estado con el resultado
+            }
+        } else {
+
+            val data = ValidateUser(
+                validateName(user.nombre),
+                validateApellido(user.apellido),
+                validateMateria(user.materia),
+                validateEmail(user.email)
+            )
+
+               runBlocking {
+                   _validatUser.send(data)
+               }
+
+
         }
+
+
     }
+
+
 
 
     private fun validateUserInput(user: UserData): Boolean {
@@ -104,6 +124,7 @@ class UserViewModel @Inject constructor(
 
     fun getAllUser() {
         repository.getAllUser {
+            _lista.value=DataState.Loading()
             _lista.value = it
         }
     }
